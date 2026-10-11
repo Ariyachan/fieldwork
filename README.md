@@ -4,23 +4,23 @@ A workspace for independent design studios. Project status, team assignments and
 
 **[Open the workspace](https://ariyachan.github.io/fieldwork/)** · **[View the case study](https://ariyachan.github.io/fieldwork/case-study.html)**
 
-![FIELDWORK studio overview](public/screenshots/overview.jpg)
+![FIELDWORK studio overview](public/screenshots/overview.jpg?v=2)
 
 ## The workflow
 
-- **Studio overview:** active projects, open tasks and pending reviews, calculated from the workspace.
+- **Studio desk:** the current drawing, pinned feedback and decision queue lead the workspace; compact totals link to projects, reviews and tasks.
 - **Projects:** searchable project library, active/completed filters, project briefs, milestones and task progress.
 - **Task board:** create assignments, move work between three states, filter by project and export the current task list as CSV.
-- **Drawing reviews:** place comments on an SVG drawing, resolve or reopen feedback, download the drawing and approve the set after every open comment is resolved.
-- **Schedule:** browse months, follow task deadlines and open upcoming project milestones.
+- **Drawing reviews:** inspect sheets with fit-to-view and zoom, place comments with a pointer or keyboard, resolve or reopen feedback, download the drawing and approve the set after every open comment is resolved.
+- **Schedule:** a desktop calendar and a phone agenda, both scoped to the selected month, with task deadlines and project milestones.
 - **Search:** find projects and tasks with the global search or `Ctrl/⌘ K`.
 
-The mobile layout uses a bottom navigation, horizontal project and task browsing, and a full-width drawing review sheet. The desktop layout keeps project navigation visible beside the workspace.
+The mobile layout puts the drawing first, stacks the decision queue and uses a full-width review sheet with a sticky approval bar. The desktop layout keeps studio navigation visible beside the desk; drawing and conversation panels scroll independently while approval stays in view.
 
 <p align="center">
-  <img src="public/screenshots/mobile-overview.jpg" alt="Mobile studio overview" width="240" />
-  <img src="public/screenshots/mobile-project.jpg" alt="Mobile project detail" width="240" />
-  <img src="public/screenshots/mobile-review.jpg" alt="Mobile drawing review" width="240" />
+  <img src="public/screenshots/mobile-overview.jpg?v=2" alt="Mobile studio overview" width="240" />
+  <img src="public/screenshots/mobile-project.jpg?v=2" alt="Mobile project detail" width="240" />
+  <img src="public/screenshots/mobile-review.jpg?v=2" alt="Mobile drawing review" width="240" />
 </p>
 
 ## Run locally
@@ -45,6 +45,7 @@ npm run build
 ```text
 src/
   App.tsx            Navigation, project and task views
+  StudioDesk.tsx     Drawing-led workspace and decision queue
   DrawingReview.tsx  Pinned feedback and approval workflow
   Schedule.tsx       Deadline calendar
   Plan.tsx           Drawing illustrations
@@ -62,4 +63,4 @@ Built with React and TypeScript. Radix primitives handle dialogs, tabs and statu
 
 A self-initiated product design and frontend project by Kai Zhang. The studio records are illustrative. Workspace changes persist in local browser storage; the project does not include a shared backend or multi-user synchronization. Drawing illustrations demonstrate the review interaction and are not construction documents.
 
-Six automated checks cover scoped task progress, combined project filters, project creation and restoration, reversible task completion, review approval gates and task assignment. Desktop and mobile browser checks cover navigation, drawing comments, approval persistence and layout overflow.
+Eight automated checks cover scoped task progress, combined project filters, project creation and restoration, reversible task completion, review approval gates, task assignment, keyboard-positioned feedback with persisted author and pin, and month-specific phone agendas. Desktop and mobile browser checks also cover sheet magnification, approval visibility and layout overflow.

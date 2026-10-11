@@ -1,13 +1,15 @@
-import { useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import {
   ArrowDownToLine,
   ArrowUpRight,
   Check,
   CheckCheck,
   CircleCheck,
+  Minus,
+  Plus,
 } from 'lucide-react'
 import { Avatar, Modal, Stage } from './components'
-import { type Project, type Review, type Workspace } from './data'
+import { members, type Project, type Review, type Workspace } from './data'
 import Plan from './Plan'
 
 export default function DrawingReview({
@@ -25,6 +27,23 @@ export default function DrawingReview({
 }) {
   const [noteText, setNoteText] = useState(''),
     [pin, setPin] = useState({ x: 50, y: 50 })
+  const [zoom, setZoom] = useState(100)
+  const [activeNote, setActiveNote] = useState<string | null>(null)
+  const [pinPlaced, setPinPlaced] = useState(false)
+  const [fitWidth, setFitWidth] = useState(0)
+  const [viewportElement, setViewportElement] = useState<HTMLDivElement | null>(
+    null,
+  )
+  useEffect(() => {
+    const target = viewportElement
+    if (!target || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect
+      setFitWidth(Math.min(width, (height * 800) / 570))
+    })
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [viewportElement])
   const input = useRef<HTMLTextAreaElement>(null),
     drawing = useRef<HTMLDivElement>(null)
   function addNote(event: FormEvent<HTMLFormElement>) {
@@ -34,6 +53,7 @@ export default function DrawingReview({
       id: crypto.randomUUID(),
       text: noteText.trim(),
       resolved: false,
+      author: 'AM',
       ...pin,
     }
     update((current) => ({
@@ -45,6 +65,8 @@ export default function DrawingReview({
       ),
     }))
     setNoteText('')
+    setActiveNote(note.id)
+    setPinPlaced(false)
     notify('Comment added to drawing')
   }
   function resolveNote(id: string) {
@@ -103,6 +125,26 @@ export default function DrawingReview({
         <span className="muted-small">
           {review.notes.filter((note) => !note.resolved).length} open comments
         </span>
+        <div className="drawing-zoom" aria-label="Drawing magnification">
+          <button
+            aria-label="Zoom out"
+            disabled={zoom === 100}
+            onClick={() => setZoom(Math.max(100, zoom - 50))}
+          >
+            <Minus size={14} />
+          </button>
+          <span aria-live="polite">{zoom}%</span>
+          <button
+            aria-label="Zoom in"
+            disabled={zoom === 250}
+            onClick={() => setZoom(Math.min(250, zoom + 50))}
+          >
+            <Plus size={14} />
+          </button>
+          <button aria-label="Fit drawing" onClick={() => setZoom(100)}>
+            Fit
+          </button>
+        </div>
         <button className="button secondary" onClick={downloadPlan}>
           <ArrowDownToLine size={14} />
           Download drawing
@@ -110,38 +152,106 @@ export default function DrawingReview({
       </div>
       <div className="drawing-workspace">
         <div className="drawing-view">
-          <div
-            ref={drawing}
-            className="drawing-canvas"
-            onClick={(event) => {
-              const box = event.currentTarget.getBoundingClientRect()
-              setPin({
-                x: Math.round(((event.clientX - box.left) / box.width) * 100),
-                y: Math.round(((event.clientY - box.top) / box.height) * 100),
-              })
-              input.current?.focus()
-            }}
-          >
-            <Plan variant={review.projectId} />
-            {review.notes.map((note, index) => (
-              <button
-                className={`drawing-pin ${note.resolved ? 'resolved' : ''}`}
-                style={{ left: `${note.x}%`, top: `${note.y}%` }}
-                aria-label={`Comment ${index + 1}: ${note.text}`}
-                key={note.id}
-                onClick={(event) => {
-                  event.stopPropagation()
-                  document
-                    .getElementById(`note-${note.id}`)
-                    ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-                }}
-              >
-                {note.resolved ? <Check size={12} /> : index + 1}
-              </button>
-            ))}
+          <div className="drawing-viewport" ref={setViewportElement}>
+            <div
+              ref={drawing}
+              className="drawing-canvas"
+              style={{ width: fitWidth ? (fitWidth * zoom) / 100 : `${zoom}%` }}
+              tabIndex={0}
+              role="region"
+              aria-label="Drawing canvas. Click to place a pin, or use arrow keys then Enter to write a comment."
+              onKeyDown={(event) => {
+                const moves: Record<string, [number, number]> = {
+                  ArrowLeft: [-5, 0],
+                  ArrowRight: [5, 0],
+                  ArrowUp: [0, -5],
+                  ArrowDown: [0, 5],
+                }
+                const direction = moves[event.key]
+                if (event.target !== event.currentTarget) return
+                if (direction) {
+                  event.preventDefault()
+                  setPin((current) => ({
+                    x: Math.max(2, Math.min(98, current.x + direction[0])),
+                    y: Math.max(2, Math.min(98, current.y + direction[1])),
+                  }))
+                  setPinPlaced(true)
+                } else if (event.key === 'Enter') {
+                  event.preventDefault()
+                  setPinPlaced(true)
+                  input.current?.focus()
+                }
+              }}
+              onClick={(event) => {
+                const box = event.currentTarget.getBoundingClientRect()
+                setPin({
+                  x: Math.round(((event.clientX - box.left) / box.width) * 100),
+                  y: Math.round(((event.clientY - box.top) / box.height) * 100),
+                })
+                setPinPlaced(true)
+                input.current?.focus()
+              }}
+            >
+              <Plan variant={review.projectId} />
+              {review.notes.map((note, index) => (
+                <button
+                  className={`drawing-pin ${note.resolved ? 'resolved' : ''} ${activeNote === note.id ? 'active' : ''}`}
+                  style={{ left: `${note.x}%`, top: `${note.y}%` }}
+                  aria-label={`Comment ${index + 1}: ${note.text}`}
+                  key={note.id}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setActiveNote(note.id)
+                    const article = document.getElementById(`note-${note.id}`)
+                    const behavior = window.matchMedia(
+                      '(prefers-reduced-motion: reduce)',
+                    ).matches
+                      ? 'auto'
+                      : 'smooth'
+                    article?.scrollIntoView({ block: 'nearest', behavior })
+                    if (
+                      article &&
+                      window.matchMedia('(max-width: 720px)').matches
+                    ) {
+                      const sheet =
+                        article.closest<HTMLElement>('.drawing-modal')
+                      if (sheet) {
+                        const headerHeight =
+                          sheet
+                            .querySelector('.modal-heading')
+                            ?.getBoundingClientRect().height || 100
+                        sheet.scrollTo({
+                          top: Math.max(
+                            0,
+                            article.getBoundingClientRect().top -
+                              sheet.getBoundingClientRect().top +
+                              sheet.scrollTop -
+                              headerHeight -
+                              20,
+                          ),
+                          behavior,
+                        })
+                      }
+                    }
+                  }}
+                >
+                  {note.resolved ? <Check size={12} /> : index + 1}
+                </button>
+              ))}
+              {pinPlaced && (
+                <span
+                  className="drawing-pin pending"
+                  style={{ left: `${pin.x}%`, top: `${pin.y}%` }}
+                >
+                  +
+                </span>
+              )}
+            </div>
           </div>
           <span className="drawing-help">
-            Click the drawing to position your next comment.
+            {pinPlaced
+              ? 'Pin positioned. Write your comment to add it to the drawing.'
+              : 'Select a pin to read feedback. Click the drawing to leave a comment.'}
           </span>
         </div>
         <aside className="comments-panel">
@@ -152,13 +262,18 @@ export default function DrawingReview({
           <div className="comments-list">
             {review.notes.map((note, index) => (
               <article
-                className={`comment ${note.resolved ? 'comment-resolved' : ''}`}
+                className={`comment ${note.resolved ? 'comment-resolved' : ''} ${activeNote === note.id ? 'active' : ''}`}
                 id={`note-${note.id}`}
                 key={note.id}
               >
                 <div>
-                  <Avatar code={index % 2 ? 'JL' : 'AM'} small />
-                  <strong>{index % 2 ? 'Jamie Lee' : 'Alex Morgan'}</strong>
+                  <Avatar
+                    code={note.author || (index % 2 ? 'JL' : 'AM')}
+                    small
+                  />
+                  <strong>
+                    {members[note.author || (index % 2 ? 'JL' : 'AM')].name}
+                  </strong>
                   <span className="comment-number">{index + 1}</span>
                 </div>
                 <p>{note.text}</p>

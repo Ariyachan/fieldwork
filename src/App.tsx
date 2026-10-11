@@ -9,13 +9,11 @@ import {
   Bell,
   CalendarDays,
   Check,
-  ChevronDown,
   ChevronRight,
   Circle,
   CircleCheck,
   Clock3,
   Ellipsis,
-  FileText,
   Folder,
   Grid2X2,
   LayoutDashboard,
@@ -51,7 +49,9 @@ import {
 import Plan from './Plan'
 import DrawingReview from './DrawingReview'
 import Schedule from './Schedule'
+import StudioDesk from './StudioDesk'
 import './App.css'
+import './Refinement.css'
 
 const sections = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -73,12 +73,19 @@ export default function App() {
   const [reviewId, setReviewId] = useState<string | null>(null),
     [toast, setToast] = useState('')
   const [resetRequested, setResetRequested] = useState(false)
+  const shortcut = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘ K' : 'Ctrl K'
+  const [todayLabel] = useState(() =>
+    new Date().toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    }),
+  )
   const currentProject = workspace.projects.find(
     (project) => route === `projects/${project.id}`,
   )
   const activeSection = currentProject ? 'projects' : route
   const review = workspace.reviews.find((item) => item.id === reviewId)
-  const openTasks = workspace.tasks.filter((task) => task.status !== 'Done')
   const pendingReviews = workspace.reviews.filter(
     (item) => item.status === 'In review',
   )
@@ -86,6 +93,9 @@ export default function App() {
   const projectTasks = currentProject
     ? workspace.tasks.filter((task) => task.projectId === currentProject.id)
     : []
+  const projectDrawing = workspace.reviews.find(
+    (item) => item.projectId === currentProject?.id,
+  )
   const displayedTasks = workspace.tasks.filter(
     (task) => taskProject === 'All' || task.projectId === taskProject,
   )
@@ -93,6 +103,8 @@ export default function App() {
     const handler = () => {
       setRoute(location.hash.slice(2) || 'overview')
       setQuery('')
+      setReviewId(null)
+      setModal(null)
       window.scrollTo(0, 0)
     }
     window.addEventListener('hashchange', handler)
@@ -291,13 +303,14 @@ export default function App() {
         </a>
         <button
           className="workspace-select"
+          aria-label="Studio settings"
           onClick={() => setModal('settings')}
         >
           <span className="workspace-symbol">a.</span>
           <span>
             Atelier Studio<small>Studio workspace</small>
           </span>
-          <ChevronDown size={15} />
+          <Settings2 size={15} />
         </button>
         <button
           className="sidebar-search"
@@ -308,7 +321,7 @@ export default function App() {
         >
           <Search size={16} />
           <span>Search anything</span>
-          <kbd>⌘ K</kbd>
+          <kbd>{shortcut}</kbd>
         </button>
         <span className="nav-label">WORKSPACE</span>
         <nav className="main-nav">
@@ -352,12 +365,15 @@ export default function App() {
         </div>
         <div className="sidebar-bottom">
           <div className="studio-note">
-            <span className="studio-note-label">THE STUDIO NOTE</span>
-            <p>
-              Good work takes
-              <br />a little room.
+            <span className="studio-note-label">THE STUDIO TEAM</span>
+            <div className="studio-team-avatars">
+              {Object.keys(members).map((code) => (
+                <Avatar code={code} key={code} small />
+              ))}
+            </div>
+            <p className="studio-team-caption">
+              {Object.keys(members).length} studio members
             </p>
-            <span className="note-line" />
           </div>
           <button
             className="profile-button"
@@ -390,7 +406,7 @@ export default function App() {
             )}
           </div>
           <div className="topbar-actions">
-            <span className="topbar-date">Sunday, 11 October</span>
+            <span className="topbar-date">{todayLabel}</span>
             <button
               className="icon-button mobile-search"
               aria-label="Search workspace"
@@ -420,185 +436,20 @@ export default function App() {
             </div>
           )}
           {route === 'overview' && (
-            <>
-              <div className="page-heading">
-                <div>
-                  <span className="eyebrow">ATELIER STUDIO / WORKSPACE 01</span>
-                  <h1>
-                    Studio overview<span className="heading-period">.</span>
-                  </h1>
-                  <p>A clear view of the work ahead.</p>
-                </div>
-                <button
-                  className="button primary"
-                  onClick={() => setModal('project')}
-                >
-                  <Plus size={16} />
-                  New project
-                </button>
-              </div>
-              <div className="metrics">
-                <div>
-                  <span>Active projects</span>
-                  <strong>
-                    {workspace.projects
-                      .filter((project) => project.stage !== 'Completed')
-                      .length.toString()
-                      .padStart(2, '0')}
-                  </strong>
-                  <small>
-                    <span className="metric-dot" />
-                    In the studio right now
-                  </small>
-                </div>
-                <div>
-                  <span>Open tasks</span>
-                  <strong>
-                    {openTasks.length.toString().padStart(2, '0')}
-                  </strong>
-                  <small>
-                    {
-                      openTasks.filter((task) => task.priority === 'High')
-                        .length
-                    }{' '}
-                    marked high priority
-                  </small>
-                </div>
-                <div>
-                  <span>Awaiting review</span>
-                  <strong>
-                    {pendingReviews.length.toString().padStart(2, '0')}
-                  </strong>
-                  <small>Drawings ready for feedback</small>
-                </div>
-                <div className="metric-progress">
-                  <span>Tasks completed</span>
-                  <strong>
-                    {Math.round(
-                      (workspace.tasks.filter((task) => task.status === 'Done')
-                        .length /
-                        Math.max(1, workspace.tasks.length)) *
-                        100,
-                    )}
-                    <em>%</em>
-                  </strong>
-                  <div className="mini-bars">
-                    {Array.from({ length: 24 }, (_, i) => (
-                      <i
-                        className={
-                          i <
-                          Math.round(
-                            (workspace.tasks.filter(
-                              (task) => task.status === 'Done',
-                            ).length /
-                              Math.max(1, workspace.tasks.length)) *
-                              24,
-                          )
-                            ? 'filled'
-                            : ''
-                        }
-                        key={i}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <section className="section-block">
-                <div className="section-heading">
-                  <div>
-                    <h2>
-                      On the drawing board{' '}
-                      <span>
-                        {
-                          workspace.projects.filter(
-                            (project) => project.stage !== 'Completed',
-                          ).length
-                        }
-                      </span>
-                    </h2>
-                    <p>The projects taking shape.</p>
-                  </div>
-                  <a href="#/projects" className="text-link">
-                    All projects
-                    <ArrowUpRight size={15} />
-                  </a>
-                </div>
-                <div className="projects-grid overview-projects">
-                  {workspace.projects
-                    .filter((project) => project.stage !== 'Completed')
-                    .slice(0, 3)
-                    .map(projectCard)}
-                </div>
-              </section>
-              <div className="overview-lower">
-                <section className="panel">
-                  <div className="panel-heading">
-                    <h2>Up next</h2>
-                    <a href="#/tasks" className="text-link">
-                      Task board
-                      <ArrowUpRight size={14} />
-                    </a>
-                  </div>
-                  <div className="panel-subtitle">
-                    <span>PRIORITY & UPCOMING</span>
-                    <span>ASSIGNED TO</span>
-                  </div>
-                  {[...openTasks]
-                    .sort((a, b) => a.due.localeCompare(b.due))
-                    .slice(0, 4)
-                    .map((task) => taskRow(task, true))}
-                  <button
-                    className="add-task-inline"
-                    onClick={() => setModal('task')}
-                  >
-                    <Plus size={15} />
-                    Add a task
-                  </button>
-                </section>
-                <section className="review-teaser">
-                  <div className="review-teaser-heading">
-                    <span className="eyebrow">READY FOR YOUR EYE</span>
-                    <span className="review-dot" />
-                  </div>
-                  <h2>
-                    {pendingReviews.length
-                      ? 'A fresh perspective.'
-                      : 'All caught up.'}
-                  </h2>
-                  <p>
-                    {pendingReviews.length
-                      ? `${pendingReviews.length} drawing sets are waiting for your review.`
-                      : 'Every drawing set has been reviewed.'}
-                  </p>
-                  {pendingReviews[0] && (
-                    <button
-                      className="teaser-drawing"
-                      onClick={() => setReviewId(pendingReviews[0].id)}
-                    >
-                      <Plan />
-                      <span>
-                        <FileText size={15} />
-                        {pendingReviews[0].version}
-                        <ArrowUpRight size={17} />
-                      </span>
-                    </button>
-                  )}
-                  <a href="#/reviews" className="text-link">
-                    Open reviews
-                    <ArrowRight size={16} />
-                  </a>
-                </section>
-              </div>
-            </>
+            <StudioDesk
+              workspace={workspace}
+              onReview={setReviewId}
+              onCreate={() => setModal('project')}
+              onAddTask={() => setModal('task')}
+              renderTask={taskRow}
+            />
           )}
           {route === 'projects' && (
             <>
               <div className="page-heading">
                 <div>
                   <span className="eyebrow">THE STUDIO / PORTFOLIO</span>
-                  <h1>
-                    Projects<span className="heading-period">.</span>
-                  </h1>
+                  <h1>Projects</h1>
                   <p>From first sketch to final handover.</p>
                 </div>
                 <button
@@ -713,10 +564,7 @@ export default function App() {
                   <span className="eyebrow">
                     {currentProject.code} / {currentProject.kind}
                   </span>
-                  <h1>
-                    {currentProject.name}
-                    <span className="heading-period">.</span>
-                  </h1>
+                  <h1>{currentProject.name}</h1>
                   <p>
                     {currentProject.client} <span className="inline-divider" />{' '}
                     {currentProject.location}
@@ -742,6 +590,10 @@ export default function App() {
                 className="project-tabs"
                 key={currentProject.id}
               >
+                <div className="project-status-bar">
+                  <Stage stage={currentProject.stage} />
+                  <span>Milestone {dateLabel(currentProject.due)}</span>
+                </div>
                 <Tabs.List aria-label="Project views">
                   <Tabs.Trigger value="overview">Overview</Tabs.Trigger>
                   <Tabs.Trigger value="tasks">
@@ -760,15 +612,42 @@ export default function App() {
                 </Tabs.List>
                 <Tabs.Content value="overview">
                   <div className="detail-hero">
-                    <div className="detail-photo">
-                      <ProjectVisual project={currentProject} />
-                      <span>
-                        {currentProject.kind} / {currentProject.location}
-                      </span>
-                    </div>
+                    {projectDrawing ? (
+                      <button
+                        className="project-drawing-sheet"
+                        onClick={() => setReviewId(projectDrawing.id)}
+                        aria-label={`Review ${projectDrawing.name}`}
+                      >
+                        <div className="sheet-heading">
+                          <span>{projectDrawing.version}</span>
+                          <Stage stage={projectDrawing.status} />
+                        </div>
+                        <Plan variant={currentProject.id} />
+                        <div className="sheet-titleblock">
+                          <div>
+                            <span className="eyebrow">CURRENT DRAWING</span>
+                            <h3>{projectDrawing.name}</h3>
+                          </div>
+                          <ArrowUpRight size={19} />
+                        </div>
+                      </button>
+                    ) : (
+                      <div className="detail-photo">
+                        <ProjectVisual project={currentProject} />
+                        <span>Concept study / {currentProject.kind}</span>
+                      </div>
+                    )}
                     <div className="detail-brief">
                       <span className="eyebrow">PROJECT BRIEF</span>
-                      <h2>A place with purpose.</h2>
+                      <h2>
+                        {currentProject.stage === 'Completed'
+                          ? 'Ready for handover.'
+                          : currentProject.stage === 'Concept design'
+                            ? 'Defining the direction.'
+                            : currentProject.stage === 'Documentation'
+                              ? 'Coordinating the details.'
+                              : 'Developing the design.'}
+                      </h2>
                       <p>{currentProject.description}</p>
                       <dl>
                         <div>
@@ -912,9 +791,7 @@ export default function App() {
               <div className="page-heading">
                 <div>
                   <span className="eyebrow">THE WORK / ONE STEP AT A TIME</span>
-                  <h1>
-                    Task board<span className="heading-period">.</span>
-                  </h1>
+                  <h1>Task board</h1>
                   <p>Keep the next move clear.</p>
                 </div>
                 <button
@@ -1050,9 +927,7 @@ export default function App() {
               <div className="page-heading">
                 <div>
                   <span className="eyebrow">THE DETAILS / BETTER TOGETHER</span>
-                  <h1>
-                    Drawing reviews<span className="heading-period">.</span>
-                  </h1>
+                  <h1>Drawing reviews</h1>
                   <p>Bring every conversation back to the drawing.</p>
                 </div>
                 <span className="review-summary">
@@ -1077,9 +952,7 @@ export default function App() {
               <div className="page-heading">
                 <div>
                   <span className="eyebrow">THE TIMELINE / LOOKING AHEAD</span>
-                  <h1>
-                    Studio schedule<span className="heading-period">.</span>
-                  </h1>
+                  <h1>Studio schedule</h1>
                   <p>Make space for what matters next.</p>
                 </div>
                 <button
@@ -1113,8 +986,8 @@ export default function App() {
             )}
           <footer className="workspace-footer">
             <span>
-              FIELDWORK <span className="footer-separator">/</span> More room to
-              create.
+              FIELDWORK <span className="footer-separator">/</span> Studio
+              workspace
             </span>
             <a
               href={`${import.meta.env.BASE_URL}case-study.html`}

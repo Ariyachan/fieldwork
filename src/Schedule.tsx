@@ -16,6 +16,23 @@ export default function Schedule({
     setMonth(next.getMonth())
     setYear(next.getFullYear())
   }
+  const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`
+  const agendaDates = [
+    ...new Set([
+      ...workspace.tasks
+        .filter(
+          (task) => task.status !== 'Done' && task.due.startsWith(monthPrefix),
+        )
+        .map((task) => task.due),
+      ...workspace.projects
+        .filter(
+          (project) =>
+            project.stage !== 'Completed' &&
+            project.due.startsWith(monthPrefix),
+        )
+        .map((project) => project.due),
+    ]),
+  ].sort()
   return (
     <div className="schedule-layout">
       <section className="calendar-panel">
@@ -102,6 +119,60 @@ export default function Schedule({
                 </div>
               )
             },
+          )}
+        </div>
+        <div className="mobile-agenda">
+          {agendaDates.length ? (
+            agendaDates.map((date) => (
+              <section className="agenda-day" key={date}>
+                <div className="agenda-date">
+                  <strong>{dateLabel(date, { day: 'numeric' })}</strong>
+                  <span>{dateLabel(date, { weekday: 'short' })}</span>
+                </div>
+                <div>
+                  {workspace.tasks
+                    .filter(
+                      (task) => task.due === date && task.status !== 'Done',
+                    )
+                    .map((task) => (
+                      <button
+                        key={task.id}
+                        onClick={() => onTask(task.projectId)}
+                      >
+                        <span>{task.title}</span>
+                        <small>
+                          {
+                            workspace.projects.find(
+                              (project) => project.id === task.projectId,
+                            )?.name
+                          }{' '}
+                          / {task.status}
+                        </small>
+                      </button>
+                    ))}
+                  {workspace.projects
+                    .filter(
+                      (project) =>
+                        project.due === date && project.stage !== 'Completed',
+                    )
+                    .map((project) => (
+                      <a
+                        className="agenda-milestone"
+                        href={`#/projects/${project.id}`}
+                        key={project.id}
+                      >
+                        <span>{project.name}</span>
+                        <small>Project milestone / {project.stage}</small>
+                      </a>
+                    ))}
+                </div>
+              </section>
+            ))
+          ) : (
+            <p className="agenda-empty">
+              No deadlines this month. Browse another month to see the studio
+              schedule.
+            </p>
           )}
         </div>
       </section>

@@ -354,7 +354,76 @@
       footer a {
         color: #6e7a61;
       }
+      .review-steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+        margin-top: 30px;
+        padding-top: 30px;
+        border-top: 1px solid #d9dad0;
+      }
+      .review-steps h3 {
+        margin-top: 12px;
+        font-size: 17px;
+      }
+      .review-steps p {
+        font-size: 13px;
+        color: #60675b;
+        line-height: 1.7;
+      }
+      .project-context {
+        padding: 65px 0;
+      }
+      .project-context img {
+        margin-top: 30px;
+        border: 1px solid #d9dad0;
+      }
+      .visual-vocabulary {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 55px;
+        border-top: 1px solid #deddd6;
+        padding: 60px 0;
+      }
+      .visual-vocabulary h2 {
+        margin: 15px 0 20px;
+      }
+      .visual-vocabulary p {
+        color: #62665c;
+        font-size: 14px;
+      }
+      .swatches {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+      .swatch {
+        height: 100px;
+        border: 1px solid #deddd6;
+        margin-bottom: 12px;
+      }
+      .swatches strong {
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .swatches span {
+        display: block;
+        font-size: 11px;
+        color: #666b60;
+        margin-top: 2px;
+      }
       @media (max-width: 800px) {
+        .review-steps,
+        .visual-vocabulary {
+          grid-template-columns: 1fr;
+          gap: 25px;
+        }
+        .swatch {
+          height: 70px;
+        }
+        .project-context {
+          padding: 45px 0;
+        }
         nav,
         main,
         footer {
@@ -513,10 +582,10 @@
       <header class="hero">
         <div>
           <span class="label">FIELDWORK / PRODUCT DESIGN & DEVELOPMENT</span>
-          <h1>A quieter way<br />to run the studio<span>.</span></h1>
+          <h1>From drawing<br />to decision<span>.</span></h1>
           <p>
-            A focused workspace that brings projects, team assignments and
-            drawing feedback together.
+            A workspace for design studios, built around the drawing and the
+            decisions that move a project forward.
           </p>
         </div>
         <div class="hero-meta">
@@ -534,60 +603,64 @@
       </header>
       <figure class="showcase" style="margin-left: 0; margin-right: 0">
         <img
-          src="screenshots/overview.jpg"
+          src="screenshots/overview.jpg?v=2"
           alt="FIELDWORK overview showing project progress, tasks and drawing reviews"
         />
         <figcaption class="image-caption">
-          <span>01 / STUDIO OVERVIEW</span
+          <span>01 / STUDIO DESK</span
           ><span
-            >Project progress is calculated from the underlying task
-            states.</span
+            >The drawing and its unresolved decisions lead the workspace.</span
           >
         </figcaption>
       </figure>
       <section class="story-section">
         <div>
           <span class="label">THE BRIEF</span>
-          <h2>Keep the work visible.<br />Keep the space calm.</h2>
+          <h2>A drawing is ready.<br />A decision is still open.</h2>
         </div>
         <div>
           <p>
-            The starting point was a small design studio with several projects
-            at different stages. A useful workspace needed to answer three
-            questions quickly: what is moving, what needs attention, and what
-            happens next?
+            The design scenario is a small architecture studio preparing a
+            drawing set for review. A courtyard opening needs a decision, the
+            kitchen layout has an unresolved comment, and the project milestone
+            is approaching. The principal needs to see the drawing and the exact
+            questions holding it up.
           </p>
           <p>
-            I organized the product around those questions. Projects provide
-            context. Tasks turn the brief into next steps. Drawing reviews keep
-            decisions attached to the work itself, rather than buried in a
-            separate conversation.
+            I made the drawing the center of the studio desk. A decision queue
+            sits beside it, and upcoming work stays one level below. Project and
+            task totals become compact navigation links. The hierarchy gives the
+            next decision more space than the overall counts.
           </p>
         </div>
       </section>
       <section class="decisions">
         <article class="decision">
           <span class="label">01 / INFORMATION</span>
-          <h3>Context before controls.</h3>
+          <h3>The drawing leads.</h3>
           <p>
-            A project shows its client, phase, milestone and task progress
-            together. Secondary controls stay quiet until they are useful.
+            The opening screen shows the current sheet, revision and comment
+            pins together. Its decision queue opens the same review directly;
+            the project page keeps the drawing beside the brief and milestone.
           </p>
         </article>
         <article class="decision">
           <span class="label">02 / INTERACTION</span>
-          <h3>Feedback has a place.</h3>
+          <h3>Approval follows the feedback.</h3>
           <p>
-            Comments sit on a drawing with a numbered pin. An open issue blocks
-            approval; reopening feedback returns the set to review.
+            Open comments block approval. Resolving the last comment enables the
+            action; new feedback or a reopened issue returns the set to review.
+            The approval bar stays visible while the drawing and conversation
+            scroll independently.
           </p>
         </article>
         <article class="decision">
           <span class="label">03 / VISUAL SYSTEM</span>
-          <h3>Structure without noise.</h3>
+          <h3>The phone keeps the decision.</h3>
           <p>
-            A restrained type scale, fine dividers and warm neutrals let the
-            work lead. Color identifies status, projects and drawing feedback.
+            The drawing comes first, followed by the same decision queue. The
+            review becomes a full-width sheet, with zoom for small details and a
+            sticky approval bar. Navigation stays within thumb reach.
           </p>
         </article>
       </section>
@@ -600,13 +673,51 @@
             </h2>
           </div>
           <p>
-            Place a comment, resolve the conversation, then approve the set. The
-            approval state follows the actual feedback state.
+            Select a numbered pin to locate its conversation. Zoom to inspect
+            the detail, place a new pin, or use arrow keys and Enter to position
+            keyboard feedback. The author and location stay attached to each
+            comment.
           </p>
         </div>
         <img
-          src="screenshots/review.jpg"
+          src="screenshots/review.jpg?v=2"
           alt="A drawing review with numbered comment pins, feedback and approval controls"
+        />
+        <div class="review-steps">
+          <div>
+            <span class="label">01 / INSPECT</span>
+            <h3>Find the exact detail.</h3>
+            <p>A pin connects the drawing location to the feedback.</p>
+          </div>
+          <div>
+            <span class="label">02 / RESOLVE</span>
+            <h3>Close the open questions.</h3>
+            <p>
+              The approval action stays unavailable until every issue is
+              resolved.
+            </p>
+          </div>
+          <div>
+            <span class="label">03 / APPROVE</span>
+            <h3>Move the set forward.</h3>
+            <p>
+              Approval updates the desk count. A new comment reopens the review.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section class="project-context">
+        <span class="label">THE PROJECT CONTEXT</span>
+        <h2 style="margin-top: 15px">The brief stays beside the work.</h2>
+        <p style="margin-top: 20px; max-width: 680px; color: #62665c">
+          The project view combines the current drawing, design phase, milestone
+          and task progress. Opening its sheet leads straight into the same
+          review, preserving the project context.
+        </p>
+        <img
+          src="screenshots/project.jpg?v=2"
+          alt="Project detail with its drawing, brief, milestone and tasks"
+          loading="lazy"
         />
       </section>
       <section class="phones-section">
@@ -616,14 +727,17 @@
             <h2 style="margin-top: 15px">The studio, on the move.</h2>
           </div>
           <p>
-            The phone layout preserves the same workflow with a bottom
-            navigation, browsable project cards and a full-width review sheet.
+            A phone visit still begins with the current drawing. Larger
+            controls, a stacked decision queue and a full-width review sheet
+            preserve the workflow at a smaller size. The schedule becomes a
+            dated agenda, so deadlines remain readable without panning a
+            calendar.
           </p>
         </div>
         <div class="phones">
           <div class="phone-stage">
             <img
-              src="screenshots/mobile-overview.jpg"
+              src="screenshots/mobile-overview.jpg?v=2"
               alt="Mobile studio overview"
               loading="lazy"
             />
@@ -631,7 +745,7 @@
           </div>
           <div class="phone-stage">
             <img
-              src="screenshots/mobile-project.jpg"
+              src="screenshots/mobile-project.jpg?v=2"
               alt="Mobile project brief"
               loading="lazy"
             />
@@ -639,11 +753,40 @@
           </div>
           <div class="phone-stage">
             <img
-              src="screenshots/mobile-review.jpg"
+              src="screenshots/mobile-review.jpg?v=2"
               alt="Mobile drawing comments"
               loading="lazy"
             />
             <p>03 / PINNED FEEDBACK</p>
+          </div>
+        </div>
+      </section>
+      <section class="visual-vocabulary">
+        <div>
+          <span class="label">THE VISUAL LANGUAGE</span>
+          <h2>A working vocabulary.</h2>
+          <p>
+            Instrument Sans carries the interface. IBM Plex Mono marks sheet
+            numbers and revisions. A dark studio rail frames a warm desk; clay
+            pins identify feedback, while green signals resolved work.
+          </p>
+        </div>
+        <div class="swatches">
+          <div>
+            <div class="swatch" style="background: #f6f5f0"></div>
+            <strong>Paper</strong><span>#F6F5F0</span>
+          </div>
+          <div>
+            <div class="swatch" style="background: #2b322e"></div>
+            <strong>Studio rail</strong><span>#2B322E</span>
+          </div>
+          <div>
+            <div class="swatch" style="background: #ad5539"></div>
+            <strong>Clay</strong><span>#AD5539</span>
+          </div>
+          <div>
+            <div class="swatch" style="background: #e5eee4"></div>
+            <strong>Resolved</strong><span>#E5EEE4</span>
           </div>
         </div>
       </section>

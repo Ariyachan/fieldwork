@@ -2,9 +2,28 @@ import { describe, expect, it } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../src/App'
+import Schedule from '../src/Schedule'
 import { findProjects, progress, seed, setTaskStatus } from '../src/data'
 
 describe('workspace operations', () => {
+  it('keeps the phone agenda scoped to the selected month', async () => {
+    const user = userEvent.setup()
+    const { container } = render(
+      <Schedule workspace={structuredClone(seed)} onTask={() => {}} />,
+    )
+    const agenda = container.querySelector('.mobile-agenda') as HTMLElement
+    expect(
+      within(agenda).getByRole('button', { name: /Prepare ground-floor plan/ }),
+    ).toBeInTheDocument()
+    expect(
+      within(agenda).getByRole('link', { name: /The Courtyard House/ }),
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Next month' }))
+    expect(within(agenda).queryByRole('button')).not.toBeInTheDocument()
+    expect(
+      within(agenda).getByText(/No deadlines this month/),
+    ).toBeInTheDocument()
+  })
   it('keeps project progress scoped to its tasks and reversible', () => {
     const original = structuredClone(seed)
     const next = setTaskStatus(original, 't1', 'Done')
@@ -41,12 +60,12 @@ describe('workspace operations', () => {
       within(dialog).getByRole('button', { name: 'Create project' }),
     )
     expect(
-      await screen.findByRole('heading', { name: 'Garden Studio.' }),
+      await screen.findByRole('heading', { name: 'Garden Studio' }),
     ).toBeInTheDocument()
     mounted.unmount()
     render(<App />)
     expect(
-      await screen.findByRole('heading', { name: 'Garden Studio.' }),
+      await screen.findByRole('heading', { name: 'Garden Studio' }),
     ).toBeInTheDocument()
     expect(screen.getByText(/Garden Collective/)).toBeInTheDocument()
     expect(
@@ -85,7 +104,9 @@ describe('workspace operations', () => {
     const user = userEvent.setup()
     render(<App />)
     await user.click(
-      screen.getByRole('button', { name: /Courtyard house floor plan/ }),
+      screen.getByRole('button', {
+        name: 'Review Ground floor — general arrangement',
+      }),
     )
     const dialog = screen.getByRole('dialog')
     expect(
@@ -116,6 +137,44 @@ describe('workspace operations', () => {
         (r: { id: string }) => r.id === 'r1',
       ).status,
     ).toBe('In review')
+  })
+  it('positions feedback with the keyboard and preserves the author and pin', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Review Ground floor — general arrangement',
+      }),
+    )
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'Zoom in' }))
+    expect(within(dialog).getByText('150%')).toBeInTheDocument()
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Fit drawing' }),
+    )
+    expect(within(dialog).getByText('100%')).toBeInTheDocument()
+    within(dialog)
+      .getByRole('region', { name: /Drawing canvas/ })
+      .focus()
+    await user.keyboard('{ArrowRight}{ArrowDown}{Enter}')
+    const input = within(dialog).getByLabelText(/Leave a comment/)
+    expect(input).toHaveFocus()
+    await user.type(input, 'Check the door swing at this opening.')
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Add comment' }),
+    )
+    const stored = JSON.parse(localStorage.getItem('fieldwork.workspace.v1')!)
+    expect(
+      stored.reviews
+        .find((review: { id: string }) => review.id === 'r1')
+        .notes.at(-1),
+    ).toMatchObject({
+      x: 55,
+      y: 55,
+      author: 'AM',
+      resolved: false,
+      text: 'Check the door swing at this opening.',
+    })
   })
   it('adds a task to the selected project with its assignee and due date', async () => {
     const user = userEvent.setup()

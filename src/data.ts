@@ -28,7 +28,14 @@ export type Review = {
   name: string
   version: string
   status: 'In review' | 'Approved'
-  notes: { id: string; text: string; resolved: boolean; x: number; y: number }[]
+  notes: {
+    id: string
+    text: string
+    resolved: boolean
+    x: number
+    y: number
+    author?: string
+  }[]
 }
 export type Workspace = {
   projects: Project[]
@@ -227,15 +234,15 @@ export const seed: Workspace = {
           id: 'n1',
           text: 'Could we widen the opening to the courtyard? Keep the structural pier on the east side.',
           resolved: false,
-          x: 48,
-          y: 48,
+          x: 49,
+          y: 40,
         },
         {
           id: 'n2',
           text: 'Align the kitchen island with the glazing axis.',
           resolved: false,
-          x: 69,
-          y: 70,
+          x: 73,
+          y: 45,
         },
       ],
     },
