@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="FIELDWORK — product design and frontend development for a focused studio workspace. A project by Kai Zhang."
+    />
+    <title>FIELDWORK — A studio workspace · Kai Zhang</title>
+    <link rel="icon" href="mark.svg" type="image/svg+xml" />
+    <style>
+      @font-face {
+        font-family: Instrument;
+        src: url('fonts/instrument-sans.woff2') format('woff2');
+        font-weight: 400;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: Instrument;
+        src: url('fonts/instrument-sans-medium.woff2') format('woff2');
+        font-weight: 500;
+        font-display: swap;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #f7f6f2;
+        color: #292a27;
+        font:
+          16px/1.7 Instrument,
+          sans-serif;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      a:focus-visible {
+        outline: 2px solid #ad5539;
+        outline-offset: 5px;
+      }
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      nav,
+      main,
+      footer {
+        max-width: 1260px;
+        margin: auto;
+        padding-left: 50px;
+        padding-right: 50px;
+      }
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 96px;
+        font-size: 13px;
+        border-bottom: 1px solid #deddd6;
+      }
+      nav > a:first-child {
+        font-weight: 500;
+      }
+      nav div {
+        display: flex;
+        gap: 28px;
+        color: #73746d;
+      }
+      h1,
+      h2,
+      h3,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(44px, 6vw, 78px);
+        font-weight: 400;
+        line-height: 1.06;
+        letter-spacing: -4px;
+        margin: 24px 0;
+      }
+      h1 span {
+        color: #ad5539;
+      }
+      h2 {
+        font-size: clamp(28px, 3.5vw, 43px);
+        font-weight: 400;
+        letter-spacing: -1.7px;
+        line-height: 1.16;
+      }
+      h3 {
+        font-size: 19px;
+        letter-spacing: -0.5px;
+        font-weight: 500;
+        margin-bottom: 11px;
+      }
+      .label {
+        font-size: 10px;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        color: #787970;
+      }
+      .hero {
+        padding: 70px 0 48px;
+        display: grid;
+        grid-template-columns: 1.65fr 1fr;
+        gap: 80px;
+        align-items: end;
+      }
+      .hero p {
+        font-size: 17px;
+        line-height: 1.75;
+        color: #6c6e65;
+        max-width: 580px;
+      }
+      .hero-meta {
+        border-top: 1px solid #d8d9d0;
+        padding-top: 22px;
+      }
+      .hero-meta > div {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        font-size: 12px;
+        border-bottom: 1px solid #dedfd6;
+      }
+      .hero-meta > div span:first-child {
+        color: #898b80;
+      }
+      .hero-meta > div span:last-child {
+        max-width: 200px;
+        text-align: right;
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        gap: 15px;
+        background: #2d3029;
+        color: #fff;
+        font-size: 12px;
+        padding: 14px 20px;
+        border-radius: 3px;
+        margin-top: 23px;
+      }
+      .button:hover {
+        background: #4e5544;
+      }
+      .showcase {
+        background: #e9e8e0;
+        padding: 34px;
+        border-radius: 6px;
+        margin-top: 15px;
+      }
+      .showcase img {
+        border: 1px solid #d4d5cb;
+        border-radius: 5px;
+        box-shadow: 0 13px 40px #272d2110;
+      }
+      .image-caption {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #818478;
+        margin-top: 15px;
+      }
+      .story-section {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 90px;
+        padding: 85px 0;
+        border-bottom: 1px solid #dbdcd3;
+      }
+      .story-section .label {
+        display: block;
+        margin-bottom: 22px;
+      }
+      .story-section p {
+        font-size: 15px;
+        color: #6b7062;
+        line-height: 1.9;
+      }
+      .story-section p + p {
+        margin-top: 18px;
+      }
+      .decisions {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 35px;
+        padding: 65px 0;
+      }
+      .decision {
+        border-top: 1px solid #d6d9cd;
+        padding-top: 24px;
+      }
+      .decision .label {
+        color: #ad5539;
+        display: block;
+        margin-bottom: 18px;
+      }
+      .decision p {
+        font-size: 13px;
+        color: #727a66;
+        line-height: 1.9;
+      }
+      .feature {
+        padding: 38px;
+        background: #e1e7d9;
+        border-radius: 5px;
+      }
+      .feature-heading {
+        display: flex;
+        justify-content: space-between;
+        gap: 60px;
+        align-items: end;
+        margin: 8px 0 32px;
+      }
+      .feature-heading h2 {
+        font-size: 33px;
+      }
+      .feature-heading p {
+        max-width: 360px;
+        font-size: 13px;
+        line-height: 1.8;
+        color: #738262;
+      }
+      .feature img {
+        border: 1px solid #d2dccc;
+        border-radius: 4px;
+      }
+      .phones-section {
+        padding: 85px 0 75px;
+      }
+      .phones-section > div:first-child {
+        display: flex;
+        justify-content: space-between;
+        gap: 60px;
+        align-items: end;
+        margin-bottom: 35px;
+      }
+      .phones-section h2 {
+        font-size: 38px;
+      }
+      .phones-section > div:first-child p {
+        max-width: 390px;
+        font-size: 14px;
+        line-height: 1.8;
+        color: #747c69;
+      }
+      .phones {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 22px;
+      }
+      .phone-stage {
+        padding: 36px 30px 25px;
+        background: #e8e2d7;
+        border-radius: 5px;
+      }
+      .phone-stage:nth-child(2) {
+        background: #dde3db;
+      }
+      .phone-stage:nth-child(3) {
+        background: #dfe3e4;
+      }
+      .phone-stage img {
+        max-width: 245px;
+        margin: auto;
+        border-radius: 15px;
+        border: 5px solid #f8f8f3;
+        box-shadow: 0 16px 35px #3a443622;
+      }
+      .phone-stage p {
+        text-align: center;
+        font-size: 10px;
+        letter-spacing: 1px;
+        color: #7e8576;
+        margin-top: 24px;
+      }
+      .delivery {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 90px;
+        padding: 20px 0 80px;
+      }
+      .delivery h2 {
+        margin: 19px 0 22px;
+      }
+      .delivery p {
+        font-size: 14px;
+        color: #747d69;
+        line-height: 1.8;
+      }
+      .deliverables {
+        border-top: 1px solid #d9e1d0;
+      }
+      .deliverables > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 0;
+        border-bottom: 1px solid #d9e1d0;
+        font-size: 13px;
+      }
+      .deliverables > div span:last-child {
+        color: #88967a;
+        font-size: 11px;
+      }
+      .closing {
+        background: #2f382a;
+        color: #f4f6ed;
+        margin-top: 5px;
+        padding: 57px 45px;
+        border-radius: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 40px;
+      }
+      .closing h2 {
+        font-size: 36px;
+      }
+      .closing p {
+        font-size: 13px;
+        color: #c0cbb6;
+        margin-top: 15px;
+      }
+      .closing .button {
+        background: #f2f4e9;
+        color: #4d5e3e;
+        margin-top: 0;
+        white-space: nowrap;
+      }
+      .project-note {
+        font-size: 11px;
+        color: #8b9580;
+        max-width: 780px;
+        margin: 28px 0 55px;
+        line-height: 1.8;
+      }
+      footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+        color: #8b9381;
+        padding-top: 24px;
+        padding-bottom: 32px;
+        border-top: 1px solid #d8ded0;
+      }
+      footer a {
+        color: #6e7a61;
+      }
+      @media (max-width: 800px) {
+        nav,
+        main,
+        footer {
+          padding-left: 24px;
+          padding-right: 24px;
+        }
+        nav {
+          height: 77px;
+        }
+        nav div {
+          gap: 19px;
+          font-size: 11px;
+        }
+        .hero {
+          grid-template-columns: 1fr;
+          gap: 35px;
+          padding: 47px 0 30px;
+        }
+        h1 {
+          letter-spacing: -2.5px;
+        }
+        .hero p {
+          font-size: 15px;
+        }
+        .hero-meta {
+          max-width: none;
+        }
+        .showcase {
+          padding: 14px;
+        }
+        .image-caption {
+          font-size: 8px;
+        }
+        .story-section {
+          grid-template-columns: 1fr;
+          gap: 24px;
+          padding: 55px 0;
+        }
+        .decisions {
+          grid-template-columns: 1fr;
+          gap: 28px;
+          padding: 42px 0;
+        }
+        .feature {
+          padding: 22px;
+        }
+        .feature-heading {
+          display: block;
+          margin-bottom: 20px;
+        }
+        .feature-heading h2 {
+          font-size: 27px;
+        }
+        .feature-heading p {
+          margin-top: 17px;
+        }
+        .phones-section {
+          padding: 55px 0;
+        }
+        .phones-section > div:first-child {
+          display: block;
+        }
+        .phones-section h2 {
+          font-size: 30px;
+        }
+        .phones-section > div:first-child p {
+          margin-top: 20px;
+        }
+        .phones {
+          gap: 10px;
+        }
+        .phone-stage {
+          padding: 18px 10px;
+        }
+        .phone-stage img {
+          border: 3px solid #f8f8f3;
+          border-radius: 10px;
+        }
+        .phone-stage p {
+          font-size: 8px;
+          letter-spacing: 0.2px;
+          margin-top: 17px;
+        }
+        .delivery {
+          grid-template-columns: 1fr;
+          gap: 30px;
+          padding-bottom: 45px;
+        }
+        .closing {
+          display: block;
+          padding: 35px 26px;
+        }
+        .closing h2 {
+          font-size: 30px;
+        }
+        .closing .button {
+          margin-top: 27px;
+        }
+        .project-note {
+          font-size: 10px;
+          margin-bottom: 38px;
+        }
+        .deliverables > div {
+          font-size: 12px;
+        }
+        .deliverables > div span:last-child {
+          font-size: 10px;
+        }
+      }
+      @media (max-width: 420px) {
+        nav > a {
+          font-size: 12px;
+        }
+        nav div > a:first-child {
+          display: none;
+        }
+        .phones {
+          grid-template-columns: 1fr;
+        }
+        .phone-stage {
+          padding: 30px 30px 20px;
+        }
+        .phone-stage img {
+          max-width: 230px;
+          border-width: 5px;
+          border-radius: 15px;
+        }
+        .phone-stage p {
+          font-size: 10px;
+          letter-spacing: 1px;
+        }
+        .hero-meta > div {
+          font-size: 11px;
+        }
+        .image-caption {
+          display: block;
+        }
+        .image-caption span + span {
+          display: block;
+          margin-top: 5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="https://ariyachan.github.io/freelance-work-samples/"
+        >Kai Zhang / Selected work</a
+      >
+      <div>
+        <a href="https://github.com/Ariyachan/fieldwork">Source code ↗</a
+        ><a href="./">Open workspace ↗</a>
+      </div>
+    </nav>
+    <main>
+      <header class="hero">
+        <div>
+          <span class="label">FIELDWORK / PRODUCT DESIGN & DEVELOPMENT</span>
+          <h1>A quieter way<br />to run the studio<span>.</span></h1>
+          <p>
+            A focused workspace that brings projects, team assignments and
+            drawing feedback together.
+          </p>
+        </div>
+        <div class="hero-meta">
+          <div>
+            <span>Role</span
+            ><span
+              >Product concept, interface design<br />and frontend
+              development</span
+            >
+          </div>
+          <div><span>Platform</span><span>Desktop & mobile web</span></div>
+          <div><span>Project</span><span>Self-initiated / 2026</span></div>
+          <a class="button" href="./">Explore the workspace <span>↗</span></a>
+        </div>
+      </header>
+      <figure class="showcase" style="margin-left: 0; margin-right: 0">
+        <img
+          src="screenshots/overview.jpg"
+          alt="FIELDWORK overview showing project progress, tasks and drawing reviews"
+        />
+        <figcaption class="image-caption">
+          <span>01 / STUDIO OVERVIEW</span
+          ><span
+            >Project progress is calculated from the underlying task
+            states.</span
+          >
+        </figcaption>
+      </figure>
+      <section class="story-section">
+        <div>
+          <span class="label">THE BRIEF</span>
+          <h2>Keep the work visible.<br />Keep the space calm.</h2>
+        </div>
+        <div>
+          <p>
+            The starting point was a small design studio with several projects
+            at different stages. A useful workspace needed to answer three
+            questions quickly: what is moving, what needs attention, and what
+            happens next?
+          </p>
+          <p>
+            I organized the product around those questions. Projects provide
+            context. Tasks turn the brief into next steps. Drawing reviews keep
+            decisions attached to the work itself, rather than buried in a
+            separate conversation.
+          </p>
+        </div>
+      </section>
+      <section class="decisions">
+        <article class="decision">
+          <span class="label">01 / INFORMATION</span>
+          <h3>Context before controls.</h3>
+          <p>
+            A project shows its client, phase, milestone and task progress
+            together. Secondary controls stay quiet until they are useful.
+          </p>
+        </article>
+        <article class="decision">
+          <span class="label">02 / INTERACTION</span>
+          <h3>Feedback has a place.</h3>
+          <p>
+            Comments sit on a drawing with a numbered pin. An open issue blocks
+            approval; reopening feedback returns the set to review.
+          </p>
+        </article>
+        <article class="decision">
+          <span class="label">03 / VISUAL SYSTEM</span>
+          <h3>Structure without noise.</h3>
+          <p>
+            A restrained type scale, fine dividers and warm neutrals let the
+            work lead. Color identifies status, projects and drawing feedback.
+          </p>
+        </article>
+      </section>
+      <section class="feature">
+        <div class="feature-heading">
+          <div>
+            <span class="label">THE REVIEW WORKFLOW</span>
+            <h2 style="margin-top: 13px">
+              The conversation<br />belongs on the drawing.
+            </h2>
+          </div>
+          <p>
+            Place a comment, resolve the conversation, then approve the set. The
+            approval state follows the actual feedback state.
+          </p>
+        </div>
+        <img
+          src="screenshots/review.jpg"
+          alt="A drawing review with numbered comment pins, feedback and approval controls"
+        />
+      </section>
+      <section class="phones-section">
+        <div>
+          <div>
+            <span class="label">THE MOBILE EXPERIENCE</span>
+            <h2 style="margin-top: 15px">The studio, on the move.</h2>
+          </div>
+          <p>
+            The phone layout preserves the same workflow with a bottom
+            navigation, browsable project cards and a full-width review sheet.
+          </p>
+        </div>
+        <div class="phones">
+          <div class="phone-stage">
+            <img
+              src="screenshots/mobile-overview.jpg"
+              alt="Mobile studio overview"
+              loading="lazy"
+            />
+            <p>01 / OVERVIEW</p>
+          </div>
+          <div class="phone-stage">
+            <img
+              src="screenshots/mobile-project.jpg"
+              alt="Mobile project brief"
+              loading="lazy"
+            />
+            <p>02 / PROJECT CONTEXT</p>
+          </div>
+          <div class="phone-stage">
+            <img
+              src="screenshots/mobile-review.jpg"
+              alt="Mobile drawing comments"
+              loading="lazy"
+            />
+            <p>03 / PINNED FEEDBACK</p>
+          </div>
+        </div>
+      </section>
+      <section class="delivery">
+        <div>
+          <span class="label">WHAT WAS BUILT</span>
+          <h2>One connected workflow.</h2>
+          <p>
+            The interfaces share the same project and task records. Completing a
+            task updates its project progress; a review decision updates the
+            workspace's pending count.
+          </p>
+        </div>
+        <div class="deliverables">
+          <div>
+            <span>Studio overview</span><span>Live workspace totals</span>
+          </div>
+          <div>
+            <span>Project library & detail</span
+            ><span>Search, filters & project creation</span>
+          </div>
+          <div>
+            <span>Task board</span><span>Assignment, states & CSV export</span>
+          </div>
+          <div>
+            <span>Drawing review</span><span>Pins, feedback & approval</span>
+          </div>
+          <div>
+            <span>Studio schedule</span><span>Deadlines & milestones</span>
+          </div>
+          <div>
+            <span>Mobile interface</span
+            ><span>Responsive views & review sheet</span>
+          </div>
+        </div>
+      </section>
+      <section class="closing">
+        <div>
+          <h2>Spend a minute in the studio.</h2>
+          <p>
+            Create a project, complete a task or leave a comment on a drawing.
+          </p>
+        </div>
+        <a class="button" href="./">Open FIELDWORK <span>↗</span></a>
+      </section>
+      <p class="project-note">
+        A self-initiated product project by Kai Zhang. The workspace contains
+        illustrative studio records, with changes saved in the browser.
+      </p>
+    </main>
+    <footer>
+      <span>Kai Zhang / FIELDWORK / 2026</span
+      ><a href="https://ariyachan.github.io/freelance-work-samples/"
+        >Back to selected work ↗</a
+      >
+    </footer>
+  </body>
+</html>
