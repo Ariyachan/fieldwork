@@ -1613,6 +1613,7 @@ main {
 }
 .project-form input,
 .project-form select,
+.project-form textarea,
 .comment-form textarea {
   border: 1px solid #d4e2c6;
   border-radius: 4px;
@@ -1624,6 +1625,7 @@ main {
   width: 100%;
 }
 .project-form input::placeholder,
+.project-form textarea::placeholder,
 .comment-form textarea::placeholder {
   color: #6a6d6a;
 }
@@ -2726,7 +2728,8 @@ main {
     font-size: 12px;
   }
   .project-form input,
-  .project-form select {
+  .project-form select,
+  .project-form textarea {
     font-size: 14px;
     min-height: 44px;
   }

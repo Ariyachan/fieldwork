@@ -1,0 +1,28 @@
+services:
+  db:
+    image: postgres:18.4
+    environment:
+      POSTGRES_DB: fieldwork
+      POSTGRES_USER: fieldwork
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - fieldwork-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fieldwork -d fieldwork"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://fieldwork:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/fieldwork
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env}
+      BETTER_AUTH_URL: http://localhost:4100
+      TRUSTED_ORIGINS: http://localhost:4100
+    ports:
+      - "127.0.0.1:4100:4100"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  fieldwork-data:

@@ -5,4 +5,5 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   base: '/fieldwork/',
   plugins: [react()],
+  server: { proxy: { '/api': 'http://127.0.0.1:4100' } },
 })

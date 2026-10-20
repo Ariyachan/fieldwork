@@ -38,6 +38,8 @@ import {
   type TaskStatus,
 } from './data'
 import { useWorkspace } from './useWorkspace'
+import { useAccount } from './account'
+import { apiEnabled } from './api'
 import {
   Avatar,
   Empty,
@@ -60,8 +62,38 @@ const sections = [
   { id: 'reviews', label: 'Reviews', icon: MessageSquare },
   { id: 'schedule', label: 'Schedule', icon: CalendarDays },
 ]
+function defaultMilestone() {
+  const date = new Date()
+  date.setDate(date.getDate() + 7)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
 export default function App() {
-  const { workspace, update, storageError } = useWorkspace()
+  const {
+    workspace,
+    update,
+    storageError,
+    ready,
+    loadError,
+    saveState,
+    saveMessage,
+    conflict,
+    reload,
+    retrySave,
+  } = useWorkspace()
+  const account = useAccount()
+  const [accountError, setAccountError] = useState('')
+  const accountName = account?.user.name || 'Alex Morgan'
+  const accountAvatar = account ? (
+    <span className="account-avatar" aria-hidden="true">
+      {accountName
+        .split(' ')
+        .map((part) => part[0])
+        .slice(0, 2)
+        .join('')}
+    </span>
+  ) : (
+    <Avatar code="AM" />
+  )
   const [route, setRoute] = useState(location.hash.slice(2) || 'overview')
   const [modal, setModal] = useState<
     'search' | 'project' | 'task' | 'settings' | null
@@ -73,6 +105,7 @@ export default function App() {
   const [reviewId, setReviewId] = useState<string | null>(null),
     [toast, setToast] = useState('')
   const [resetRequested, setResetRequested] = useState(false)
+  const [projectToEdit, setProjectToEdit] = useState<Project | null>(null)
   const shortcut = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘ K' : 'Ctrl K'
   const [todayLabel] = useState(() =>
     new Date().toLocaleDateString('en-GB', {
@@ -144,28 +177,45 @@ export default function App() {
     const name = String(fields.get('name')).trim(),
       client = String(fields.get('client')).trim()
     if (!name || !client) return
-    const id = crypto.randomUUID()
-    const project: Project = {
-      id,
-      name,
-      client,
-      code: `FW—${String(workspace.projects.length + 21).padStart(3, '0')}`,
-      kind: String(fields.get('kind')),
-      due: String(fields.get('due')),
-      stage: 'Concept design',
-      location: 'Location to be confirmed',
-      color: '#b4c1ac',
-      image: '',
-      description:
-        'A new project, ready for its first brief. Add tasks and bring the team into the next phase.',
-      members: ['AM'],
-    }
+    const id = projectToEdit?.id || crypto.randomUUID()
+    const project: Project = projectToEdit
+      ? {
+          ...projectToEdit,
+          name,
+          client,
+          kind: String(fields.get('kind')),
+          due: String(fields.get('due')),
+          description: String(fields.get('description')).trim(),
+        }
+      : {
+          id,
+          name,
+          client,
+          code: `FW—${String(workspace.projects.length + 21).padStart(3, '0')}`,
+          kind: String(fields.get('kind')),
+          due: String(fields.get('due')),
+          stage: 'Concept design',
+          location: 'Location to be confirmed',
+          color: '#b4c1ac',
+          image: '',
+          description:
+            String(fields.get('description')).trim() ||
+            'A new project, ready for its first brief. Add tasks and bring the team into the next phase.',
+          members: ['AM'],
+        }
     update((current) => ({
       ...current,
-      projects: [...current.projects, project],
+      projects: projectToEdit
+        ? current.projects.map((item) => (item.id === id ? project : item))
+        : [...current.projects, project],
     }))
     navigate(`projects/${id}`)
-    setToast('Project created')
+    setToast(projectToEdit ? 'Project updated' : 'Project created')
+    setProjectToEdit(null)
+  }
+  function newProject() {
+    setProjectToEdit(null)
+    setModal('project')
   }
   function createTask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -290,6 +340,37 @@ export default function App() {
       </button>
     )
   }
+  if (!ready)
+    return (
+      <div className="connection-screen">
+        {loadError ? (
+          <div className="workspace-load-error" role="alert">
+            <h1>Your studio is waiting.</h1>
+            <p>{loadError}</p>
+            <button className="button primary" onClick={() => void reload()}>
+              Try again
+            </button>
+            {account && (
+              <button
+                className="button secondary"
+                onClick={() =>
+                  void account
+                    .signOut()
+                    .catch(() =>
+                      setAccountError('Could not sign out. Please try again.'),
+                    )
+                }
+              >
+                Sign out
+              </button>
+            )}
+            {accountError && <p>{accountError}</p>}
+          </div>
+        ) : (
+          <span role="status">Loading your workspace…</span>
+        )}
+      </div>
+    )
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -345,7 +426,7 @@ export default function App() {
             <button
               aria-label="Create project"
               className="tiny-button"
-              onClick={() => setModal('project')}
+              onClick={newProject}
             >
               <Plus size={15} />
             </button>
@@ -379,9 +460,10 @@ export default function App() {
             className="profile-button"
             onClick={() => setModal('settings')}
           >
-            <Avatar code="AM" />
+            {accountAvatar}
             <span>
-              Alex Morgan<small>Studio principal</small>
+              {accountName}
+              <small>{account ? 'Your workspace' : 'Studio principal'}</small>
             </span>
             <Settings2 size={16} />
           </button>
@@ -425,7 +507,13 @@ export default function App() {
               <Bell size={18} />
               {pendingReviews.length > 0 && <i />}
             </button>
-            <Avatar code="AM" small />
+            <button
+              className="icon-button account-menu"
+              aria-label="Account and workspace settings"
+              onClick={() => setModal('settings')}
+            >
+              {accountAvatar}
+            </button>
           </div>
         </header>
         <main id="main-content">
@@ -435,11 +523,19 @@ export default function App() {
               retain them.
             </div>
           )}
+          {saveMessage && (
+            <div className="workspace-connection" role="alert">
+              <span>{saveMessage}</span>
+              <button onClick={() => (conflict ? void reload() : retrySave())}>
+                {conflict ? 'Discard local edits & reload' : 'Retry saving'}
+              </button>
+            </div>
+          )}
           {route === 'overview' && (
             <StudioDesk
               workspace={workspace}
               onReview={setReviewId}
-              onCreate={() => setModal('project')}
+              onCreate={newProject}
               onAddTask={() => setModal('task')}
               renderTask={taskRow}
             />
@@ -452,10 +548,7 @@ export default function App() {
                   <h1>Projects</h1>
                   <p>From first sketch to final handover.</p>
                 </div>
-                <button
-                  className="button primary"
-                  onClick={() => setModal('project')}
-                >
+                <button className="button primary" onClick={newProject}>
                   <Plus size={16} />
                   New project
                 </button>
@@ -522,10 +615,7 @@ export default function App() {
                 >
                   {visibleProjects.map(projectCard)}
                   {!query && filter !== 'Completed' && (
-                    <button
-                      className="new-project-card"
-                      onClick={() => setModal('project')}
-                    >
+                    <button className="new-project-card" onClick={newProject}>
                       <span>
                         <Plus size={23} />
                       </span>
@@ -571,6 +661,15 @@ export default function App() {
                   </p>
                 </div>
                 <div className="detail-heading-actions">
+                  <button
+                    className="button secondary"
+                    onClick={() => {
+                      setProjectToEdit(currentProject)
+                      setModal('project')
+                    }}
+                  >
+                    Edit project
+                  </button>
                   <div className="avatar-stack">
                     {currentProject.members.map((code) => (
                       <Avatar code={code} key={code} />
@@ -988,6 +1087,23 @@ export default function App() {
             <span>
               FIELDWORK <span className="footer-separator">/</span> Studio
               workspace
+              {apiEnabled && (
+                <span
+                  className={`sync-status ${saveState === 'error' ? 'error' : ''}`}
+                  role="status"
+                >
+                  {saveState === 'saved' ? (
+                    <Check size={12} />
+                  ) : (
+                    <Clock3 size={12} />
+                  )}
+                  {saveState === 'saved'
+                    ? 'All changes saved'
+                    : saveState === 'saving'
+                      ? 'Saving changes…'
+                      : 'Changes not saved'}
+                </span>
+              )}
             </span>
             <a
               href={`${import.meta.env.BASE_URL}case-study.html`}
@@ -1078,10 +1194,18 @@ export default function App() {
       <Modal
         open={modal === 'project'}
         onClose={() => setModal(null)}
-        title="A new project"
-        description="Start with the essentials. The details can follow."
+        title={projectToEdit ? 'Edit project' : 'A new project'}
+        description={
+          projectToEdit
+            ? 'Keep the brief and next milestone up to date.'
+            : 'Start with the essentials. The details can follow.'
+        }
       >
-        <form className="project-form" onSubmit={createProject}>
+        <form
+          className="project-form"
+          onSubmit={createProject}
+          key={projectToEdit?.id || 'new'}
+        >
           <label>
             Project name
             <input
@@ -1089,6 +1213,7 @@ export default function App() {
               required
               maxLength={80}
               placeholder="e.g. The Garden Studio"
+              defaultValue={projectToEdit?.name || ''}
               autoFocus
             />
           </label>
@@ -1099,12 +1224,16 @@ export default function App() {
               required
               maxLength={80}
               placeholder="Client or organization"
+              defaultValue={projectToEdit?.client || ''}
             />
           </label>
           <div className="form-grid">
             <label>
               Project type
-              <select name="kind">
+              <select
+                name="kind"
+                defaultValue={projectToEdit?.kind || 'Residential'}
+              >
                 <option>Residential</option>
                 <option>Retail</option>
                 <option>Workplace</option>
@@ -1117,10 +1246,20 @@ export default function App() {
                 type="date"
                 name="due"
                 required
-                defaultValue="2026-10-30"
+                defaultValue={projectToEdit?.due || defaultMilestone()}
               />
             </label>
           </div>
+          <label>
+            Project brief
+            <textarea
+              name="description"
+              rows={3}
+              maxLength={2000}
+              defaultValue={projectToEdit?.description || ''}
+              placeholder="What are we working towards?"
+            />
+          </label>
           <div className="form-actions">
             <button
               className="button secondary"
@@ -1130,7 +1269,7 @@ export default function App() {
               Cancel
             </button>
             <button className="button primary" type="submit">
-              Create project
+              {projectToEdit ? 'Save project' : 'Create project'}
               <ArrowRight size={15} />
             </button>
           </div>
@@ -1188,7 +1327,7 @@ export default function App() {
                 name="due"
                 type="date"
                 required
-                defaultValue="2026-10-16"
+                defaultValue={defaultMilestone()}
               />
             </label>
           </div>
@@ -1224,19 +1363,23 @@ export default function App() {
           <div className="settings-profile">
             <Avatar code="AM" />
             <div>
-              <strong>Alex Morgan</strong>
-              <span>Studio principal</span>
+              <strong>{accountName}</strong>
+              <span>{account?.user.email || 'Studio principal'}</span>
             </div>
           </div>
           <p>
-            Projects, tasks and drawing feedback are saved in this browser.
+            {account
+              ? 'Projects, tasks and drawing feedback are saved to your account.'
+              : 'Projects, tasks and drawing feedback are saved in this browser.'}{' '}
             Start fresh whenever you need a clean workspace.
           </p>
           {resetRequested ? (
             <div className="reset-confirmation">
               <p>
                 Your added projects, tasks and comments will be removed from
-                this browser.
+                {account
+                  ? ' your account and replaced with the example studio.'
+                  : ' this browser.'}
               </p>
               <div>
                 <button
@@ -1265,6 +1408,30 @@ export default function App() {
             >
               Reset workspace
             </button>
+          )}
+          {account && (
+            <>
+              <button
+                className="account-signout"
+                disabled={saveState !== 'saved'}
+                onClick={() => {
+                  setAccountError('')
+                  void account
+                    .signOut()
+                    .catch(() =>
+                      setAccountError('Could not sign out. Please try again.'),
+                    )
+                }}
+              >
+                Sign out
+              </button>
+              {saveState !== 'saved' && (
+                <p className="save-before-signout">
+                  Save or reload your changes before signing out.
+                </p>
+              )}
+              {accountError && <p role="alert">{accountError}</p>}
+            </>
           )}
           <a
             className="text-link"

@@ -1,0 +1,18 @@
+{
+  "verified_on_utc": "2026-10-20T08:34:52Z",
+  "environment": { "node": "22.18.0", "database": "PostgreSQL18.4 provided by root" },
+  "dependencies": { "express": "5.3.0", "better-auth": "1.7.11", "pg": "8.23.1", "zod": "4.6.7" },
+  "checks": [
+    { "command": "npm install", "result": "119 packages installed; npm audit reported0 vulnerabilities" },
+    { "command": "npm run migrate", "result": "Better Auth official programmatic migrations and application workspace table applied to real PostgreSQL. First bootstrap logged missing auth tables before creating them; subsequent auth requests and repeated migration passed." },
+    { "command": "npm run typecheck", "result": "pass after final schema fixes" },
+    { "command": "npm run migrate; npm test using native .env.local loading", "result": "pass without shell environment credential injection; local configuration is Git-ignored and no values displayed" },
+    { "command": "npm test", "result": "9 tests passed,0 failed,0 skipped; real HTTP and real PostgreSQL, including optional static hosting", "log": "integration-test.log" }
+  ],
+  "covered": ["unauthenticated business APIs401", "live PostgreSQL health probe", "two actual Better Auth registrations and hashed credentials", "cross-user isolation including404 for another user's project", "project CRUD and shared workspace revision", "11 invalid payload variants rejected without changing stored snapshot", "duplicate creation409", "foreign write origin403", "two concurrent workspace updates yield200 and409", "stale revision cannot overwrite", "logout and re-login", "wrong password rejected", "persisted session and workspace survive server and pool recreation"],
+  "review_findings_fixed": ["unknown comment author rejected before it can break the UI member lookup", "Approved reviews cannot contain unresolved comments"],
+  "independent_review": "Both fixes independently verified against schema; no remaining bugs reported in the bounded review. Root confirmed the existing frontend already returns reopened comments to In review.",
+  "static_hosting_verification": "Explicit and missing STATIC_DIR cases tested over actual HTTP: root redirect, index HTML, JavaScript asset, missing resource404 without index fallback, absent directory404, and business API401 unchanged.",
+  "limits": ["local independent portfolio work only; no external deployment or application sent", "no production traffic/load testing or security audit claimed", "start requires explicit environment secret and connection URL; no runnable credentials committed"],
+  "ownership": "Only server directory modified. Root owns frontend integration and runtime startup."
+}

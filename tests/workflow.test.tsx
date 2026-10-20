@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../src/App'
 import Schedule from '../src/Schedule'
@@ -188,6 +188,7 @@ describe('workspace operations', () => {
     await user.selectOptions(within(dialog).getByLabelText('Project'), 'north')
     await user.selectOptions(within(dialog).getByLabelText('Assigned to'), 'SC')
     await user.selectOptions(within(dialog).getByLabelText('Priority'), 'High')
+    fireEvent.change(within(dialog).getByLabelText('Due date'), { target: { value: '2026-11-02' } })
     await user.click(within(dialog).getByRole('button', { name: 'Add task' }))
     const stored = JSON.parse(localStorage.getItem('fieldwork.workspace.v1')!)
     expect(stored.tasks.at(-1)).toMatchObject({
@@ -196,7 +197,7 @@ describe('workspace operations', () => {
       assignee: 'SC',
       priority: 'High',
       status: 'To do',
-      due: '2026-10-16',
+      due: '2026-11-02',
     })
   })
 })

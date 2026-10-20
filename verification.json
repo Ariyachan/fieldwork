@@ -1,0 +1,17 @@
+{
+  "checked_on": "2026-10-20",
+  "environment": "Windows, Node 22.18.0, real PostgreSQL 18.4 on loopback",
+  "frontend": {"tests": 11, "failed": 0, "lint": "passed", "fullstack_build": "passed"},
+  "backend": {"tests": 9, "failed": 0, "details": "server/verification.json"},
+  "browser": {
+    "registration": "Created a local synthetic test account using the visible sign-up form",
+    "persistence": "Created Harbor Studio and a task, completed the task, edited the brief, refreshed and verified all saved values",
+    "sessions": "Signed out through account settings, signed back in and verified the same saved project",
+    "built_runtime": "Loaded /fieldwork/ from Express on localhost:4100 with the real authenticated API and PostgreSQL",
+    "responsive": "390px project and sign-in views checked; project scrollWidth390/innerWidth390; temporary viewport overrides cleared",
+    "screenshots": ["public/screenshots/fullstack-project.png", "public/screenshots/fullstack-mobile.png", "public/screenshots/fullstack-signin.png", "public/screenshots/fullstack-mobile-signin.png"]
+  },
+  "review_fixes": ["invalidate old account save queues on unmount, with regression test", "include seed.json in Docker runtime", "space between mobile headline sentences"],
+  "compose": "docker compose config --no-interpolate passed; container startup not tested because local Docker engine was unavailable",
+  "limits": "Independent sample, not client delivery or acceptance; public Pages site remains the static demo; no hosted public API claimed"
+}

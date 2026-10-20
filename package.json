@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:fullstack": "vite --mode fullstack",
     "build": "tsc -b && vite build",
+    "build:fullstack": "tsc -b && vite build --mode fullstack",
     "site": "npm run build && node scripts/publish-site.mjs",
     "lint": "oxlint",
     "test": "vitest run",

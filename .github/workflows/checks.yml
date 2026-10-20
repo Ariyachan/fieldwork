@@ -18,3 +18,35 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.4
+        env:
+          POSTGRES_USER: fieldwork
+          POSTGRES_PASSWORD: integration-fixture
+          POSTGRES_DB: fieldwork_test
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U fieldwork -d fieldwork_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    defaults:
+      run:
+        working-directory: server
+    env:
+      DATABASE_URL: postgresql://fieldwork:integration-fixture@localhost:5432/fieldwork_test
+      BETTER_AUTH_SECRET: fieldwork-ci-only-ephemeral-test-key-20261020
+      BETTER_AUTH_URL: http://localhost:4100
+      TRUSTED_ORIGINS: http://localhost:4100,http://localhost:5173
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22.18.0'
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run migrate
+      - run: npm test
